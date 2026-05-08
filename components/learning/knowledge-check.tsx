@@ -18,59 +18,68 @@ export function KnowledgeCheck({
   correctAnswer,
   explanation,
 }: KnowledgeCheckProps) {
-  const [selected, setSelected] = React.useState<number | null>(null);
-  const [showExplanation, setShowExplanation] = React.useState(false);
-
-  const isCorrect = selected === correctAnswer;
+  const [selectedOption, setSelectedOption] = React.useState<number | null>(null);
+  const submitted = selectedOption !== null;
+  const isCorrect = selectedOption === correctAnswer;
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
-      className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl space-y-8"
+      className="rounded-[2.5rem] border border-white/[0.05] bg-[#0f172a]/30 p-10 md:p-16 shadow-2xl backdrop-blur-sm"
     >
-      <div className="flex items-center gap-3 text-primary">
-        <HelpCircle className="h-6 w-6" />
-        <span className="text-[10px] uppercase font-black tracking-[0.2em]">Quick Check</span>
-      </div>
+      <div className="space-y-12">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+              <HelpCircle className="h-6 w-6" />
+            </div>
+            <span className="text-[10px] uppercase font-black tracking-[0.3em] text-slate-500">
+              Knowledge Check
+            </span>
+          </div>
+          <h3 className="text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight">
+            {question}
+          </h3>
+        </div>
 
-      <h3 className="text-2xl font-bold text-white leading-tight">
-        {question}
-      </h3>
-
-      <div className="grid grid-cols-1 gap-4">
-        {options.map((option, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              if (selected === null) setSelected(index);
-            }}
-            disabled={selected !== null}
-            className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all text-left group ${
-              selected === null
-                ? "border-white/5 bg-white/5 hover:border-primary/50 hover:bg-primary/5"
-                : index === correctAnswer
-                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                : selected === index
-                ? "border-rose-500/50 bg-rose-500/10 text-rose-400"
-                : "border-white/5 opacity-50"
-            }`}
-          >
-            <span className="font-bold text-lg">{option}</span>
-            {selected !== null && (
-              index === correctAnswer ? (
-                <CheckCircle2 className="h-6 w-6 shrink-0" />
-              ) : selected === index ? (
-                <XCircle className="h-6 w-6 shrink-0" />
-              ) : null
-            )}
-          </button>
-        ))}
+        <div className="grid gap-4">
+          {options.map((option, idx) => (
+            <button
+              key={idx}
+              onClick={() => !submitted && setSelectedOption(idx)}
+              disabled={submitted}
+              className={`group flex items-center justify-between px-8 py-6 rounded-3xl border transition-all text-left ${
+                selectedOption === idx
+                  ? "bg-primary/10 border-primary shadow-lg shadow-primary/5"
+                  : "bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04] hover:border-white/20"
+              } ${submitted ? "cursor-default" : "cursor-pointer active:scale-[0.99]"}`}
+            >
+              <div className="flex items-center gap-6">
+                <div className={`h-8 w-8 rounded-xl border flex items-center justify-center text-xs font-black transition-all ${
+                  selectedOption === idx
+                    ? "bg-primary border-primary text-white"
+                    : "bg-white/5 border-white/10 text-slate-500 group-hover:text-slate-300"
+                }`}>
+                  {String.fromCharCode(65 + idx)}
+                </div>
+                <span className={`text-xl font-medium transition-colors ${
+                  selectedOption === idx ? "text-white" : "text-slate-400 group-hover:text-slate-200"
+                }`}>
+                  {option}
+                </span>
+              </div>
+              <div className={`h-6 w-6 rounded-full border-2 transition-all ${
+                selectedOption === idx ? "bg-primary border-primary scale-110" : "border-white/10 group-hover:border-white/30"
+              }`} />
+            </button>
+          ))}
+        </div>
       </div>
 
       <AnimatePresence>
-        {selected !== null && (
+        {submitted && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}

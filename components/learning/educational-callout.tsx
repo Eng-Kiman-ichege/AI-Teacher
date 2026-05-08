@@ -16,28 +16,28 @@ const config = {
     icon: Lightbulb,
     color: "text-amber-400",
     bg: "bg-amber-400/5",
-    border: "border-amber-400/20",
+    border: "border-amber-400/10",
     label: "Pro Tip",
   },
   warning: {
     icon: AlertTriangle,
     color: "text-rose-400",
     bg: "bg-rose-400/5",
-    border: "border-rose-400/20",
+    border: "border-rose-400/10",
     label: "Watch Out",
   },
   info: {
     icon: Info,
     color: "text-sky-400",
     bg: "bg-sky-400/5",
-    border: "border-sky-400/20",
+    border: "border-sky-400/10",
     label: "Note",
   },
   "key-concept": {
     icon: Sparkles,
     color: "text-emerald-400",
     bg: "bg-emerald-400/5",
-    border: "border-emerald-400/20",
+    border: "border-emerald-400/10",
     label: "Core Mastery",
   },
 };
@@ -47,19 +47,19 @@ export function EducationalCallout({ type, content, title }: EducationalCalloutP
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.98 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
-      className={`rounded-2xl border ${border} ${bg} p-6 flex gap-4 items-start shadow-lg shadow-black/5`}
+      className={`rounded-3xl border ${border} ${bg} p-8 flex gap-6 items-start shadow-xl backdrop-blur-sm`}
     >
-      <div className={`mt-1 h-8 w-8 shrink-0 flex items-center justify-center rounded-lg bg-black/20 ${color}`}>
+      <div className={`mt-1 h-10 w-10 shrink-0 flex items-center justify-center rounded-xl bg-black/40 border border-white/[0.05] ${color}`}>
         <Icon className="h-5 w-5" />
       </div>
-      <div className="space-y-1">
-        <span className={`text-[10px] uppercase font-black tracking-[0.2em] ${color}`}>
+      <div className="space-y-2">
+        <span className={`text-[10px] uppercase font-black tracking-[0.3em] ${color} opacity-80`}>
           {title || label}
         </span>
-        <div className="text-slate-300 leading-relaxed font-medium">
+        <div className="text-slate-300 leading-relaxed font-medium text-lg">
           {content}
         </div>
       </div>

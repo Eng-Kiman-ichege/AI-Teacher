@@ -13,8 +13,9 @@ export async function chatCompletion(messages: any[], isJson = false) {
       "X-Title": "AI Teacher Platform", // Optional
     },
     body: JSON.stringify({
-      model: "openai/gpt-oss-120b:free",
+      model: "openrouter/auto",
       messages: messages,
+      max_tokens: 4000,
       ...(isJson && { response_format: { type: "json_object" } }),
     }),
   });

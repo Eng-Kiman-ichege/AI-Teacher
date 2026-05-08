@@ -12,24 +12,24 @@ interface ConceptCardProps {
 export function ConceptCard({ title, content, icon = "lightbulb" }: ConceptCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-8 transition-all hover:bg-white/[0.08] hover:border-primary/20 shadow-xl"
+      className="group relative overflow-hidden rounded-3xl border border-white/[0.05] bg-[#0f172a]/20 p-10 transition-all hover:bg-[#0f172a]/40 hover:border-primary/30 shadow-xl"
     >
-      <div className="flex items-start gap-6">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+      <div className="flex items-start gap-8">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110 shadow-inner border border-primary/10">
           {icon === "lightbulb" ? (
-            <Lightbulb className="h-6 w-6" />
+            <Lightbulb className="h-7 w-7" />
           ) : (
-            <BookOpen className="h-6 w-6" />
+            <BookOpen className="h-7 w-7" />
           )}
         </div>
-        <div className="space-y-3">
-          <h3 className="text-xl font-bold text-white tracking-tight">
+        <div className="space-y-4">
+          <h3 className="text-2xl font-bold text-white tracking-tight leading-none">
             {title}
           </h3>
-          <div className="text-slate-300 leading-relaxed text-lg">
+          <div className="text-slate-400 leading-[1.6] text-xl font-medium">
             {content}
           </div>
         </div>

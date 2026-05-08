@@ -29,41 +29,38 @@ export function LessonHero({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/10 via-background to-violet-500/10 p-8 md:p-12 shadow-2xl"
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      className="relative overflow-hidden rounded-[2.5rem] border border-white/[0.05] bg-[#0f172a]/30 p-10 md:p-16 shadow-2xl backdrop-blur-sm"
     >
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute top-0 right-0 -mr-24 -mt-24 h-96 w-96 rounded-full bg-primary/5 blur-[120px]" />
+      <div className="absolute bottom-0 left-0 -ml-24 -mb-24 h-96 w-96 rounded-full bg-violet-500/5 blur-[120px]" />
       
-      <div className="relative z-10 space-y-6">
-        <div className="flex flex-wrap gap-3">
-          <Badge variant="secondary" className="bg-primary/20 text-primary border-none px-3 py-1 text-xs font-bold uppercase tracking-wider">
+      <div className="relative z-10 space-y-8">
+        <div className="flex flex-wrap gap-4">
+          <Badge variant="secondary" className="bg-primary/10 text-primary border border-primary/20 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em]">
             {difficulty}
           </Badge>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium bg-white/5 px-3 py-1 rounded-full border border-white/5">
-            <Clock className="h-4 w-4 text-primary" />
+          <div className="flex items-center gap-2 text-xs text-slate-400 font-bold bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.05]">
+            <Clock className="h-4 w-4 text-primary/70" />
             {duration}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium bg-white/5 px-3 py-1 rounded-full border border-white/5">
-            <BarChart className="h-4 w-4 text-violet-400" />
-            Interactive Lesson
           </div>
         </div>
 
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+        <h1 className="text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.1]">
           {title}
         </h1>
         
-        <p className="text-lg md:text-xl text-slate-300 max-w-3xl leading-relaxed">
+        <p className="text-xl md:text-2xl text-slate-400 max-w-3xl leading-relaxed font-medium">
           {summary}
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center gap-8 pt-4">
-          <div className="w-full sm:w-64 space-y-2">
-            <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              <span>Lesson Progress</span>
+        <div className="flex flex-col sm:flex-row items-center gap-12 pt-6">
+          <div className="w-full sm:w-80 space-y-3">
+            <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+              <span>Mastery Progress</span>
               <span>{progress}%</span>
             </div>
-            <Progress value={progress} className="h-2 bg-white/10" />
+            <Progress value={progress} className="h-1.5 bg-white/[0.05]" />
           </div>
 
           <Button 

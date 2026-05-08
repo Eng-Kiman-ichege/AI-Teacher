@@ -29,38 +29,38 @@ export function TutorPanel() {
   };
 
   return (
-    <div className="flex flex-col h-[600px] border border-white/10 rounded-3xl bg-black/20 backdrop-blur-xl overflow-hidden shadow-2xl">
-      <div className="p-6 border-b border-white/5 bg-white/5 flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-inner">
+    <div className="flex flex-col h-[600px] border border-white/[0.05] rounded-[2rem] bg-[#0f172a]/20 backdrop-blur-xl overflow-hidden shadow-2xl">
+      <div className="p-6 border-b border-white/[0.05] bg-white/[0.02] flex items-center gap-4">
+        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-inner">
           <Bot className="h-6 w-6" />
         </div>
         <div>
-          <h4 className="font-bold text-white tracking-tight">AI Learning Tutor</h4>
+          <h4 className="font-bold text-white tracking-tight text-lg">AI Tutor</h4>
           <div className="flex items-center gap-1.5">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] uppercase font-black tracking-widest text-emerald-500">Online & Ready</span>
+            <span className="text-[10px] uppercase font-black tracking-widest text-emerald-500/80">Online & Ready</span>
           </div>
         </div>
       </div>
 
-      <ScrollArea className="flex-1 p-6">
-        <div className="space-y-6">
+      <ScrollArea className="flex-1 p-8">
+        <div className="space-y-8">
           {messages.map((m, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}
+              className={`flex gap-4 ${m.role === "user" ? "flex-row-reverse" : ""}`}
             >
-              <Avatar className="h-8 w-8 border border-white/10">
-                <AvatarFallback className={m.role === "assistant" ? "bg-primary/20 text-primary" : "bg-violet-500/20 text-violet-400"}>
+              <Avatar className="h-9 w-9 border border-white/[0.08] shadow-lg">
+                <AvatarFallback className={m.role === "assistant" ? "bg-primary/20 text-primary font-black text-xs" : "bg-violet-500/20 text-violet-400 font-black text-xs"}>
                   {m.role === "assistant" ? "AI" : "ME"}
                 </AvatarFallback>
               </Avatar>
-              <div className={`max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${
+              <div className={`max-w-[85%] p-5 rounded-[1.5rem] text-[15px] leading-relaxed shadow-xl ${
                 m.role === "assistant" 
-                  ? "bg-white/5 text-slate-300 border border-white/5" 
-                  : "bg-primary text-white shadow-lg shadow-primary/20"
+                  ? "bg-white/[0.03] text-slate-300 border border-white/[0.05]" 
+                  : "bg-primary text-white font-medium"
               }`}>
                 {m.content}
               </div>
@@ -69,25 +69,25 @@ export function TutorPanel() {
         </div>
       </ScrollArea>
 
-      <div className="p-4 bg-white/5 border-t border-white/5">
+      <div className="p-6 bg-white/[0.02] border-t border-white/[0.05]">
         <div className="relative">
           <Input 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Ask your tutor..." 
-            className="h-12 bg-black/40 border-white/10 rounded-2xl pl-4 pr-12 text-sm focus:ring-primary/20"
+            placeholder="Ask your tutor anything..." 
+            className="h-14 bg-black/20 border-white/[0.08] rounded-2xl pl-5 pr-14 text-sm focus:ring-primary/20 placeholder:text-slate-500"
           />
           <Button 
             size="icon"
             onClick={handleSend}
-            className="absolute right-1 top-1 h-10 w-10 rounded-xl bg-primary hover:bg-primary/90 transition-all"
+            className="absolute right-1.5 top-1.5 h-11 w-11 rounded-xl bg-primary hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-4 w-4 text-white" />
           </Button>
         </div>
-        <p className="text-[10px] text-center text-muted-foreground mt-3 uppercase tracking-widest font-bold">
-          Powered by Advanced AI Intelligence
+        <p className="text-[9px] text-center text-slate-500 mt-4 uppercase tracking-[0.2em] font-black">
+          Powered by Advanced Learning AI
         </p>
       </div>
     </div>

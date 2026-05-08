@@ -25,18 +25,18 @@ export function CodePlayground({ code, language, title }: CodePlaygroundProps) {
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="rounded-2xl border border-white/10 bg-[#0d0d0d] overflow-hidden shadow-2xl"
+      className="rounded-3xl border border-white/[0.05] bg-[#020617]/50 overflow-hidden shadow-2xl backdrop-blur-sm"
     >
-      <div className="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-white/[0.02]">
-        <div className="flex items-center gap-3">
-          <div className="flex gap-1.5">
-            <div className="h-3 w-3 rounded-full bg-rose-500/50" />
-            <div className="h-3 w-3 rounded-full bg-amber-500/50" />
-            <div className="h-3 w-3 rounded-full bg-emerald-500/50" />
+      <div className="flex items-center justify-between px-8 py-4 border-b border-white/[0.05] bg-white/[0.02]">
+        <div className="flex items-center gap-4">
+          <div className="flex gap-2">
+            <div className="h-3 w-3 rounded-full bg-rose-500/30 border border-rose-500/20" />
+            <div className="h-3 w-3 rounded-full bg-amber-500/30 border border-amber-500/20" />
+            <div className="h-3 w-3 rounded-full bg-emerald-500/30 border border-emerald-500/20" />
           </div>
           <div className="h-4 w-px bg-white/10 mx-1" />
-          <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
-            <Terminal className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+            <Terminal className="h-3.5 w-3.5 text-primary/70" />
             {title || language}
           </div>
         </div>
@@ -44,7 +44,7 @@ export function CodePlayground({ code, language, title }: CodePlaygroundProps) {
           variant="ghost"
           size="sm"
           onClick={handleCopy}
-          className="h-8 px-3 text-xs gap-2 hover:bg-white/5 text-muted-foreground hover:text-white transition-all"
+          className="h-9 px-4 text-[10px] uppercase font-black tracking-widest gap-2 hover:bg-white/5 text-slate-500 hover:text-white transition-all rounded-xl"
         >
           {copied ? (
             <>
@@ -59,8 +59,8 @@ export function CodePlayground({ code, language, title }: CodePlaygroundProps) {
           )}
         </Button>
       </div>
-      <div className="p-6 overflow-x-auto custom-scrollbar">
-        <pre className="font-mono text-sm leading-relaxed text-slate-300">
+      <div className="p-8 overflow-x-auto custom-scrollbar bg-black/20">
+        <pre className="font-mono text-sm leading-[1.7] text-slate-300 selection:bg-primary/30">
           <code>{code}</code>
         </pre>
       </div>

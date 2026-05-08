@@ -20,12 +20,21 @@ interface ContentRendererProps {
 
 export function ContentRenderer({ content, lessonTitle }: ContentRendererProps) {
   const blocks = React.useMemo(() => {
+    if (!content) return [];
+    
+    const trimmed = content.trim();
+    const isJson = (trimmed.startsWith("{") && trimmed.endsWith("}")) || 
+                   (trimmed.startsWith("[") && trimmed.endsWith("]"));
+
+    if (!isJson) {
+      return [{ type: "legacy", html: content }];
+    }
+
     try {
-      const parsed = JSON.parse(content);
-      return Array.isArray(parsed) ? parsed : [];
+      const parsed = JSON.parse(trimmed);
+      return Array.isArray(parsed) ? parsed : [parsed];
     } catch (e) {
-      console.error("Failed to parse lesson blocks:", e);
-      // Legacy fallback: if it's not JSON, render it as raw text/html (legacy mode)
+      console.warn("Failed to parse lesson blocks JSON, falling back to legacy:", e);
       return [{ type: "legacy", html: content }];
     }
   }, [content]);
@@ -93,7 +102,16 @@ export function ContentRenderer({ content, lessonTitle }: ContentRendererProps) 
             return (
               <div 
                 key={index}
-                className="prose prose-invert max-w-none"
+                className="prose prose-lg prose-invert max-w-none 
+                  prose-headings:font-bold prose-headings:tracking-tight
+                  prose-h3:text-primary prose-h3:text-3xl prose-h3:mb-6
+                  prose-h4:text-violet-400 prose-h4:text-xl prose-h4:border-b prose-h4:border-violet-400/20 prose-h4:pb-2 prose-h4:mb-4
+                  prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-6
+                  prose-pre:bg-[#1e1e1e] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl prose-pre:p-6 prose-pre:shadow-2xl
+                  prose-code:text-emerald-400 prose-code:bg-emerald-400/10 prose-code:px-2 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
+                  prose-strong:text-white prose-strong:font-extrabold
+                  prose-ul:space-y-3 prose-ul:mb-6
+                  prose-li:text-slate-300 prose-li:marker:text-primary"
                 dangerouslySetInnerHTML={{ __html: block.html }}
               />
             );

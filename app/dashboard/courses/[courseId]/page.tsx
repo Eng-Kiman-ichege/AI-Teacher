@@ -118,18 +118,22 @@ export default async function CoursePage({ params }: { params: { courseId: strin
                 </div>
                 <div className="divide-y divide-border/50">
                   {module.lessons?.sort((a: any, b: any) => a.order - b.order).map((lesson: any) => (
-                    <div key={lesson.id} className="px-6 py-4 flex items-center justify-between hover:bg-primary/5 transition-colors group">
+                    <Link 
+                      key={lesson.id} 
+                      href={`/dashboard/courses/${courseId}/lessons/${lesson.id}`}
+                      className="px-6 py-4 flex items-center justify-between hover:bg-primary/5 transition-colors group border-b border-border/50 last:border-0"
+                    >
                       <div className="flex items-center gap-4">
                         <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold group-hover:bg-primary/20 group-hover:text-primary transition-colors">
                           {lesson.order}
                         </div>
-                        <span className="font-medium">{lesson.title}</span>
+                        <span className="font-medium group-hover:text-primary transition-colors">{lesson.title}</span>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="text-xs text-muted-foreground">{lesson.duration_minutes}m</span>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span className="text-xs text-muted-foreground">{lesson.duration_minutes || 60}m</span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </Card>

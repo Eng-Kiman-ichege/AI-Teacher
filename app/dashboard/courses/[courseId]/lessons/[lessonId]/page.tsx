@@ -67,30 +67,30 @@ export default async function LessonPage({
   const nextLesson = allLessons[currentIndex + 1];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-black text-slate-200">
+    <div className="flex h-screen overflow-hidden bg-[#020617] text-slate-200 dark">
       {/* LEFT SIDEBAR: Navigation */}
-      <div className="hidden lg:flex w-80 flex-col border-r border-white/5 bg-[#050505] shadow-2xl">
-        <div className="p-6 space-y-6">
+      <div className="hidden lg:flex w-80 flex-col border-r border-white/[0.03] bg-[#020617] shadow-2xl">
+        <div className="p-6 space-y-8">
           <Link 
             href={`/dashboard/courses/${courseId}`}
-            className="flex items-center gap-3 text-sm font-bold text-muted-foreground hover:text-white transition-all group"
+            className="flex items-center gap-3 text-xs font-bold text-slate-400 hover:text-white transition-all group tracking-widest uppercase"
           >
-            <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-primary/20 group-hover:text-primary transition-all">
+            <div className="h-8 w-8 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center group-hover:bg-primary/20 group-hover:text-primary transition-all">
               <ArrowLeft className="h-4 w-4" />
             </div>
             Back to Course
           </Link>
           
-          <div className="space-y-1">
-            <h3 className="text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground px-2 mb-4">
+          <div className="space-y-2">
+            <h3 className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-500 px-2 mb-4">
               Curriculum Roadmap
             </h3>
-            <ScrollArea className="h-[calc(100vh-200px)] pr-4">
-              <div className="space-y-6">
+            <ScrollArea className="h-[calc(100vh-220px)] pr-4">
+              <div className="space-y-8">
                 {course.modules?.sort((a: any, b: any) => a.order - b.order).map((m: any) => (
-                  <div key={m.id} className="space-y-2">
-                    <p className="text-xs font-bold text-white/40 px-2 flex items-center gap-2">
-                      <div className="h-1 w-1 rounded-full bg-primary" />
+                  <div key={m.id} className="space-y-3">
+                    <p className="text-[11px] font-black text-slate-400 px-2 flex items-center gap-2 uppercase tracking-wider">
+                      <div className="h-1 w-1 rounded-full bg-primary/50" />
                       {m.title}
                     </p>
                     <div className="space-y-1">
@@ -98,20 +98,20 @@ export default async function LessonPage({
                         <Link
                           key={l.id}
                           href={`/dashboard/courses/${courseId}/lessons/${l.id}`}
-                          className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                          className={`group flex items-center gap-3 px-3 py-3 rounded-2xl text-sm transition-all ${
                             l.id === lessonId 
                               ? "bg-primary/10 text-primary font-bold border border-primary/20 shadow-lg shadow-primary/5" 
-                              : "hover:bg-white/5 text-slate-400 hover:text-slate-200 border border-transparent"
+                              : "hover:bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-transparent"
                           }`}
                         >
                           <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-all ${
                             l.id === lessonId 
                               ? "bg-primary border-primary text-white" 
-                              : "bg-white/5 border-white/10 group-hover:border-white/20"
+                              : "bg-white/[0.05] border-white/[0.08] group-hover:border-white/20"
                           }`}>
                             <span className="text-[10px]">{l.order}</span>
                           </div>
-                          <span className="truncate flex-1">{l.title}</span>
+                          <span className="truncate flex-1 tracking-tight">{l.title}</span>
                           {l.id === lessonId && (
                             <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                           )}
@@ -127,22 +127,22 @@ export default async function LessonPage({
       </div>
 
       {/* CENTER: Lesson Content */}
-      <main className="flex-1 overflow-y-auto custom-scrollbar bg-background">
-        <div className="max-w-4xl mx-auto px-6 py-12 lg:px-12 space-y-12">
+      <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#020617] selection:bg-primary/30">
+        <div className="max-w-4xl mx-auto px-8 py-16 lg:px-16 space-y-16">
           <LessonContent lessonId={lessonId} initialContent={lesson.content} />
 
           {/* Navigation Footer */}
-          <div className="flex items-center justify-between gap-6 pt-12 border-t border-white/5">
+          <div className="flex items-center justify-between gap-6 pt-16 border-t border-white/[0.05]">
             <Button 
               variant="outline" 
-              className="h-14 px-8 rounded-2xl bg-white/5 border-white/10 hover:bg-white/10 transition-all font-bold"
+              className="h-14 px-8 rounded-2xl bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] transition-all font-bold text-slate-400 hover:text-white"
               disabled={!prevLesson}
               asChild={!!prevLesson}
             >
               {prevLesson ? (
                 <Link href={`/dashboard/courses/${courseId}/lessons/${prevLesson.id}`}>
                   <ChevronLeft className="mr-3 h-5 w-5" />
-                  Previous
+                  Previous Module
                 </Link>
               ) : (
                 <span>
@@ -153,17 +153,17 @@ export default async function LessonPage({
             </Button>
 
             <Button 
-              className="h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 font-black shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+              className="h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 font-black shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 text-white"
               asChild={!!nextLesson}
             >
               {nextLesson ? (
                 <Link href={`/dashboard/courses/${courseId}/lessons/${nextLesson.id}`}>
-                  Next Lesson
+                  Continue Journey
                   <ChevronRight className="ml-3 h-5 w-5" />
                 </Link>
               ) : (
                 <Link href={`/dashboard/courses/${courseId}`}>
-                  Finish Mastery
+                  Achieve Mastery
                   <Trophy className="ml-3 h-5 w-5" />
                 </Link>
               )}
@@ -173,9 +173,9 @@ export default async function LessonPage({
       </main>
 
       {/* RIGHT SIDEBAR: Tools & Tutor */}
-      <div className="hidden xl:flex w-96 flex-col border-l border-white/5 bg-[#050505] p-6 space-y-6">
-        <div className="space-y-2">
-          <h3 className="text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground mb-4">
+      <div className="hidden xl:flex w-96 flex-col border-l border-white/[0.03] bg-[#020617] p-8 space-y-10">
+        <div className="space-y-4">
+          <h3 className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-500 mb-2">
             Personal AI Tutor
           </h3>
           <TutorPanel />

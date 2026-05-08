@@ -94,6 +94,8 @@ DROP POLICY IF EXISTS "Anyone can manage progress" ON progress;
 CREATE POLICY "Public select users" ON users FOR SELECT USING (TRUE);
 CREATE POLICY "Public insert users" ON users FOR INSERT WITH CHECK (TRUE);
 CREATE POLICY "Anyone can view courses" ON courses FOR SELECT USING (TRUE);
+CREATE POLICY "Users can manage their own courses" ON courses FOR ALL 
+  USING (auth.uid()::text = created_by);
 CREATE POLICY "Anyone can view modules" ON modules FOR SELECT USING (TRUE);
 CREATE POLICY "Anyone can view lessons" ON lessons FOR SELECT USING (TRUE);
 CREATE POLICY "Anyone can manage progress" ON progress FOR ALL USING (TRUE);
