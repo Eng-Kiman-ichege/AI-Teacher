@@ -33,6 +33,11 @@ export async function generateCourseStructure(topic: string, retryCount = 0): Pr
   } catch (error: any) {
     console.error(`Course generation error (Attempt ${retryCount + 1}):`, error);
     
+    // Fatal errors that shouldn't be retried
+    if (error.message?.includes("INSUFFICIENT_CREDITS")) {
+      throw error;
+    }
+    
     if (retryCount < 2) {
       const delay = Math.pow(2, retryCount) * 1000;
       console.log(`Retrying generation in ${delay}ms...`);
@@ -40,7 +45,7 @@ export async function generateCourseStructure(topic: string, retryCount = 0): Pr
       return generateCourseStructure(topic, retryCount + 1);
     }
     
-    throw new Error("The AI returned a malformed response. Please try a more specific topic or try again in a moment.");
+    throw new Error(error.message || "The AI returned a malformed response. Please try a more specific topic or try again in a moment.");
   }
 }
 
