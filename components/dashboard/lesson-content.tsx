@@ -3,8 +3,10 @@
 import * as React from "react";
 import { generateLessonContentAction } from "@/lib/actions/course-gen";
 import { Button } from "@/components/ui/button";
-import { Loader2, Sparkles, BookOpen } from "lucide-react";
+import { Sparkles, Loader2, BookOpen, Wand2 } from "lucide-react";
 import { toast } from "sonner";
+import { ContentRenderer } from "./content-renderer";
+import { motion } from "framer-motion";
 
 interface LessonContentProps {
   lessonId: string;
@@ -27,85 +29,70 @@ export function LessonContent({ lessonId, initialContent }: LessonContentProps) 
       const result = await generateLessonContentAction(lessonId);
       if (result.success) {
         setContent(result.content);
-        toast.success("Lesson content generated successfully!");
+        toast.success("AI has crafted your personalized mastery guide!");
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to generate content");
+      toast.error(error.message || "Failed to generate content. Please try again.");
     } finally {
       setIsGenerating(false);
     }
   };
 
-  if (content) {
+  if (isGenerating) {
     return (
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-        <div 
-          className="prose prose-lg prose-invert max-w-none 
-            prose-headings:font-bold prose-headings:tracking-tight
-            prose-h3:text-primary prose-h3:text-3xl prose-h3:mb-6
-            prose-h4:text-violet-400 prose-h4:text-xl prose-h4:border-b prose-h4:border-violet-400/20 prose-h4:pb-2 prose-h4:mb-4
-            prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-6
-            prose-pre:bg-[#1e1e1e] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl prose-pre:p-6 prose-pre:shadow-2xl
-            prose-code:text-emerald-400 prose-code:bg-emerald-400/10 prose-code:px-2 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
-            prose-strong:text-white prose-strong:font-extrabold
-            prose-ul:space-y-3 prose-ul:mb-6
-            prose-li:text-slate-300 prose-li:marker:text-primary" 
-          dangerouslySetInnerHTML={{ __html: content }} 
-        />
-        
-        <div className="pt-10 border-t border-border/50">
-          <div className="bg-primary/5 rounded-2xl p-6 border border-primary/10 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-              <Sparkles className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h4 className="font-bold text-white text-lg">Did you know?</h4>
-              <p className="text-sm text-muted-foreground">
-                You can ask me to expand on any point in this lesson. I'm here to ensure you master every detail!
-              </p>
-            </div>
+      <div className="flex flex-col items-center justify-center py-24 space-y-8 text-center animate-in fade-in duration-500">
+        <div className="relative">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            className="h-24 w-24 rounded-3xl border-2 border-dashed border-primary/40 flex items-center justify-center"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Wand2 className="h-10 w-10 text-primary animate-pulse" />
           </div>
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold text-white tracking-tight">AI Teacher is Thinking...</h2>
+          <p className="text-muted-foreground text-lg max-w-md mx-auto leading-relaxed">
+            We're building a structured, interactive mastery guide for this topic. This usually takes about 30 seconds.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {[1, 2, 3].map(i => (
+            <motion.div
+              key={i}
+              animate={{ opacity: [0.2, 1, 0.2] }}
+              transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
+              className="h-2 w-2 rounded-full bg-primary"
+            />
+          ))}
         </div>
       </div>
     );
   }
 
+  if (content) {
+    return <ContentRenderer content={content} lessonTitle="Lesson Content" />;
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
-      <div className="relative">
-        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
-          <BookOpen className="h-10 w-10 text-primary" />
-        </div>
-        {isGenerating && (
-          <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-        )}
+    <div className="flex flex-col items-center justify-center py-24 text-center space-y-8 bg-white/5 rounded-[2.5rem] border border-white/10 shadow-2xl backdrop-blur-md">
+      <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+        <BookOpen className="h-10 w-10" />
       </div>
-      
-      <div className="space-y-2">
-        <h3 className="text-2xl font-bold">Ready to learn?</h3>
-        <p className="text-muted-foreground max-w-md mx-auto">
-          This lesson is currently empty. Click the button below to have our AI Teacher 
-          generate a deep, comprehensive study guide for this topic.
+      <div className="space-y-3 px-6">
+        <h3 className="text-3xl font-black text-white tracking-tight italic uppercase">Start Your Mastery</h3>
+        <p className="text-slate-400 max-w-sm mx-auto text-lg leading-relaxed">
+          This lesson is ready for activation. Click below to generate your interactive, AI-powered study guide.
         </p>
       </div>
-
       <Button 
-        size="lg" 
-        onClick={handleGenerate} 
-        disabled={isGenerating}
-        className="h-14 px-8 rounded-2xl font-bold shadow-xl shadow-primary/20 gap-2 text-lg"
+        onClick={handleGenerate}
+        size="lg"
+        className="h-16 px-10 rounded-2xl bg-primary hover:bg-primary/90 font-black shadow-2xl shadow-primary/40 scale-105 hover:scale-110 transition-all active:scale-95"
       >
-        {isGenerating ? (
-          <>
-            <Loader2 className="h-5 w-5 animate-spin" />
-            Generating Deep Content...
-          </>
-        ) : (
-          <>
-            <Sparkles className="h-5 w-5" />
-            Generate Expert Lesson
-          </>
-        )}
+        <Sparkles className="mr-3 h-6 w-6" />
+        GENERATE EXPERT LESSON
       </Button>
     </div>
   );
