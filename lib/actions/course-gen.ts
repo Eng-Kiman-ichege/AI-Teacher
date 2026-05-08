@@ -177,16 +177,16 @@ export async function generateLessonContentAction(lessonId: string) {
     1. { "type": "hero", "title": "...", "summary": "...", "difficulty": "...", "duration": "..." }
     2. { "type": "concept", "title": "...", "content": "...", "icon": "lightbulb|book" }
     3. { "type": "callout", "calloutType": "tip|warning|info|key-concept", "content": "...", "title": "..." }
-    4. { "type": "code", "language": "javascript", "code": "...", "title": "..." }
+    4. { "type": "code", "language": "javascript", "code": "...", "title": "..." } (ONLY for programming/tech topics)
     5. { "type": "timeline", "steps": [ { "title": "...", "description": "..." } ] }
     6. { "type": "quiz", "question": "...", "options": [ "...", "...", "...", "..." ], "correctAnswer": 0, "explanation": "..." }
 
     LESSON FLOW:
     - Start with a "hero" block.
     - Break down concepts into "concept" cards.
-    - Use "callout" blocks for tips and warnings.
-    - Provide deep code examples in "code" blocks.
-    - Explain processes using "timeline" blocks.
+    - Use "callout" blocks for tips, warnings, or vocabulary highlights.
+    - Provide "code" blocks ONLY if the topic is technical (coding, math formulas, etc). Otherwise, DO NOT use them.
+    - Explain processes or history using "timeline" blocks.
     - End with a "quiz" block for knowledge verification.
     
     BE DETAILED: Each block should contain substantial educational value. Cover the topic exhaustively.
