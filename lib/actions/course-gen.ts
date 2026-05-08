@@ -1,0 +1,215 @@
+"use server";
+
+import { chatCompletion } from "@/lib/ai/openrouter";
+import { getGenerationMessages } from "@/lib/ai/prompts";
+import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
+import { currentUser } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+
+export async function generateCourseStructure(topic: string, retryCount = 0): Promise<any> {
+  try {
+    const messages = getGenerationMessages(topic);
+    const result = await chatCompletion(messages, true);
+    
+    // Clean potential markdown code blocks and whitespace
+    let cleanJson = result.replace(/```json\n?|```/g, "").trim();
+    
+    // Remove potential unescaped control characters like newlines within strings
+    cleanJson = cleanJson.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+
+    return JSON.parse(cleanJson);
+  } catch (error: any) {
+    console.error(`Course generation error (Attempt ${retryCount + 1}):`, error);
+    
+    if (retryCount < 1) {
+      console.log("Retrying generation due to malformed response...");
+      return generateCourseStructure(topic, retryCount + 1);
+    }
+    
+    throw new Error("The AI returned a malformed response. Please try a more specific topic or try again in a moment.");
+  }
+}
+
+export async function saveCourseAction(courseData: any) {
+  const clerkUser = await currentUser();
+  if (!clerkUser) throw new Error("Unauthorized");
+
+  // Use service client to bypass RLS for insertion
+  const supabase = createServiceClient();
+
+  // 1. Insert Course
+  const { data: course, error: courseError } = await supabase
+    .from("courses")
+    .insert({
+      title: courseData.title,
+      description: courseData.description,
+      category: "AI Generated",
+      created_by: clerkUser.id,
+    })
+    .select()
+    .single();
+
+  if (courseError) {
+    console.error("Error inserting course:", courseError);
+    throw new Error(courseError.message);
+  }
+
+  console.log("Course inserted successfully:", course.id);
+
+  // 2. Insert Modules & Lessons
+  for (const moduleData of courseData.modules) {
+    console.log(`Inserting module: ${moduleData.title}`);
+    const { data: module, error: moduleError } = await supabase
+      .from("modules")
+      .insert({
+        course_id: course.id,
+        title: moduleData.title,
+        order: moduleData.order,
+      })
+      .select()
+      .single();
+
+    if (moduleError) {
+      console.error(`Error inserting module ${moduleData.title}:`, moduleError);
+      continue;
+    }
+
+    const lessonsToInsert = moduleData.lessons.map((l: any, idx: number) => ({
+      module_id: module.id,
+      title: l.title,
+      duration_minutes: parseInt(l.duration) || 15,
+      order: l.order || (idx + 1),
+    }));
+
+    console.log(`Inserting ${lessonsToInsert.length} lessons for module ${module.title}`);
+    const { data: lessons, error: lessonError } = await supabase
+      .from("lessons")
+      .insert(lessonsToInsert)
+      .select();
+    
+    if (lessonError) {
+      console.error(`Error inserting lessons for module ${module.title}:`, lessonError);
+      continue;
+    }
+
+    // NEW: Generate deep content for each lesson immediately
+    if (lessons) {
+      console.log(`Generating deep content for ${lessons.length} lessons...`);
+      for (const lesson of lessons) {
+        try {
+          // We don't await the full generation here to avoid extreme timeouts
+          // but we can try to do a few or just call the action
+          await generateLessonContentAction(lesson.id);
+        } catch (e) {
+          console.error(`Failed upfront generation for lesson ${lesson.id}:`, e);
+        }
+      }
+    }
+  }
+
+  revalidatePath("/dashboard");
+  return { success: true, courseId: course.id };
+}
+
+export async function deleteCourseAction(courseId: string) {
+  const clerkUser = await currentUser();
+  if (!clerkUser) throw new Error("Unauthorized");
+
+  const supabase = await createClient();
+
+  // RLS or a check here to ensure the user owns the course
+  const { error } = await supabase
+    .from("courses")
+    .delete()
+    .eq("id", courseId)
+    .eq("created_by", clerkUser.id);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function generateLessonContentAction(lessonId: string) {
+  const clerkUser = await currentUser();
+  if (!clerkUser) throw new Error("Unauthorized");
+
+  const supabase = createServiceClient();
+
+  // 1. Fetch lesson and course context
+  const { data: lesson, error: lessonError } = await supabase
+    .from("lessons")
+    .select("*, module:modules(*, course:courses(*))")
+    .eq("id", lessonId)
+    .single();
+
+  if (!lesson || lessonError) throw new Error("Lesson not found");
+
+  const prompt = `
+    You are an expert teacher. Generate a deep, comprehensive, and engaging lesson for:
+    Course: ${lesson.module.course.title}
+    Module: ${lesson.module.title}
+    Lesson Topic: ${lesson.title}
+
+    Requirements:
+    1. Provide a detailed explanation of the concept.
+    2. Include professional examples and code snippets (if applicable).
+    3. Use <h3> for main sections and <h4> for subtopics. 
+    4. For subtopics (<h4>), ensure they are descriptive.
+    5. Ensure all code is wrapped in <pre><code className="language-javascript">...</code></pre>.
+    6. Use <strong> for important terms.
+    7. Return ONLY the HTML content. No JSON, no markdown wrappers.
+    
+    Vibe: Professional, vibrant, and highly readable.
+    
+    Format:
+    <h3 className="text-2xl font-bold text-primary mb-4">Introduction</h3>
+    <p className="mb-6">...</p>
+    <h4 className="text-lg font-bold text-violet-400 border-b border-violet-400/30 pb-1 mb-3">Subtopic Title</h4>
+    <p className="mb-6">...</p>
+    <pre className="bg-[#1e1e1e] p-4 rounded-xl border border-white/10 mb-6 overflow-x-auto"><code className="text-sm font-mono text-gray-300">...</code></pre>
+  `;
+
+  try {
+    const result = await chatCompletion([
+      { role: "system", content: "You are a professional educational content creator who writes exclusively in clean HTML." },
+      { role: "user", content: prompt }
+    ]);
+
+    let content = result;
+
+    // Rescue logic: If AI returns JSON instead of raw HTML, extract the content field
+    if (result.trim().startsWith("{") || result.trim().startsWith("[")) {
+      try {
+        const parsed = JSON.parse(result.replace(/```json\n?|```/g, "").trim());
+        if (Array.isArray(parsed) && parsed[0]?.content) {
+          content = parsed[0].content;
+        } else if (parsed.content) {
+          content = parsed.content;
+        }
+      } catch (e) {
+        console.warn("Failed to parse AI JSON response, using raw result.");
+      }
+    }
+
+    // Final cleanup: Replace \n with <br/> or wrap in <p> if it looks like raw text
+    if (!content.includes("<p>") && !content.includes("<h3>")) {
+      content = content.split("\n\n").map(p => `<p className="mb-4">${p}</p>`).join("");
+    }
+
+    // 2. Update lesson content
+    const { error: updateError } = await supabase
+      .from("lessons")
+      .update({ content })
+      .eq("id", lessonId);
+
+    if (updateError) throw new Error(updateError.message);
+
+    revalidatePath(`/dashboard/courses/${lesson.module.course.id}/lessons/${lessonId}`);
+    return { success: true, content };
+  } catch (error: any) {
+    console.error("Error generating lesson content:", error);
+    throw new Error("Failed to generate deep lesson content.");
+  }
+}
