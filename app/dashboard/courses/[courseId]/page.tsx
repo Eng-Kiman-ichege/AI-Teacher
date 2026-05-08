@@ -9,8 +9,10 @@ import {
   Play, 
   CheckCircle2, 
   ChevronRight,
-  ArrowLeft
+  ArrowLeft,
+  Lock
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export default async function CoursePage({ params }: { params: { courseId: string } }) {
@@ -117,24 +119,57 @@ export default async function CoursePage({ params }: { params: { courseId: strin
                   <Badge variant="outline" className="bg-background">{module.lessons.length} Lessons</Badge>
                 </div>
                 <div className="divide-y divide-border/50">
-                  {module.lessons?.sort((a: any, b: any) => a.order - b.order).map((lesson: any) => (
-                    <Link 
-                      key={lesson.id} 
-                      href={`/dashboard/courses/${courseId}/lessons/${lesson.id}`}
-                      className="px-6 py-4 flex items-center justify-between hover:bg-primary/5 transition-colors group border-b border-border/50 last:border-0"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold group-hover:bg-primary/20 group-hover:text-primary transition-colors">
-                          {lesson.order}
+                  {module.lessons?.sort((a: any, b: any) => a.order - b.order).map((lesson: any, index: number) => {
+                    const lessonIndex = sortedLessons.findIndex((l: any) => l.id === lesson.id);
+                    const isCompleted = progressData?.some(p => p.lesson_id === lesson.id && p.is_completed);
+                    const isLocked = lessonIndex > 0 && !progressData?.some(p => p.lesson_id === sortedLessons[lessonIndex - 1].id && p.is_completed);
+                    
+                    if (isLocked) {
+                      return (
+                        <div 
+                          key={lesson.id} 
+                          className="px-6 py-4 flex items-center justify-between opacity-50 cursor-not-allowed bg-muted/5 border-b border-border/50 last:border-0"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                              <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                            </div>
+                            <span className="font-medium text-muted-foreground">{lesson.title}</span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="text-xs text-muted-foreground">{lesson.duration_minutes || 15}m</span>
+                          </div>
                         </div>
-                        <span className="font-medium group-hover:text-primary transition-colors">{lesson.title}</span>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs text-muted-foreground">{lesson.duration_minutes || 60}m</span>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </Link>
-                  ))}
+                      );
+                    }
+
+                    return (
+                      <Link 
+                        key={lesson.id} 
+                        href={`/dashboard/courses/${courseId}/lessons/${lesson.id}`}
+                        className="px-6 py-4 flex items-center justify-between hover:bg-primary/5 transition-colors group border-b border-border/50 last:border-0"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={cn(
+                            "h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
+                            isCompleted ? "bg-emerald-500/10 text-emerald-500" : "bg-muted group-hover:bg-primary/20 group-hover:text-primary"
+                          )}>
+                            {isCompleted ? <CheckCircle2 className="h-4 w-4" /> : lesson.order}
+                          </div>
+                          <span className={cn(
+                            "font-medium transition-colors",
+                            isCompleted ? "text-emerald-500" : "group-hover:text-primary"
+                          )}>
+                            {lesson.title}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-xs text-muted-foreground">{lesson.duration_minutes || 15}m</span>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </Card>
             ))}

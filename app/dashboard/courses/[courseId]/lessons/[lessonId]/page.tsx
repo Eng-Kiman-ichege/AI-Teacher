@@ -11,7 +11,8 @@ import {
   Bookmark,
   StickyNote,
   Trophy,
-  Sparkles
+  Sparkles,
+  Lock
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -47,15 +48,14 @@ export default async function LessonPage({
 
   if (!course) notFound();
 
-  // Fetch progress
-  const { data: progress } = await supabase
+  // Fetch progress for ALL lessons in this course to check locking
+  const { data: allProgress } = await supabase
     .from("progress")
     .select("*")
-    .eq("lesson_id", lessonId)
-    .eq("user_id", clerkUser?.id)
-    .single();
+    .eq("course_id", courseId)
+    .eq("user_id", clerkUser?.id);
 
-  const isCompleted = progress?.is_completed || false;
+  const isCompleted = allProgress?.some(p => p.lesson_id === lessonId && p.is_completed) || false;
 
   // Navigation logic
   const allLessons = course.modules
@@ -63,6 +63,30 @@ export default async function LessonPage({
     .sort((a: any, b: any) => a.moduleOrder - b.moduleOrder || a.order - b.order) || [];
 
   const currentIndex = allLessons.findIndex((l: any) => l.id === lessonId);
+  
+  // Security check: Is this lesson locked?
+  const isLocked = currentIndex > 0 && !allProgress?.some(p => p.lesson_id === allLessons[currentIndex - 1].id && p.is_completed);
+  
+  if (isLocked) {
+    // If locked, redirect back to the course overview
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-[#020617] text-white p-6 text-center space-y-6">
+        <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20">
+          <Lock className="h-10 w-10 text-primary" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-3xl font-black tracking-tight">Lesson Locked</h2>
+          <p className="text-slate-400 max-w-sm mx-auto">
+            Please complete the previous lesson "{allLessons[currentIndex - 1].title}" to unlock this content.
+          </p>
+        </div>
+        <Button asChild className="rounded-xl h-12 px-8 font-bold">
+          <Link href={`/dashboard/courses/${courseId}`}>Return to Curriculum</Link>
+        </Button>
+      </div>
+    );
+  }
+
   const prevLesson = allLessons[currentIndex - 1];
   const nextLesson = allLessons[currentIndex + 1];
 
@@ -94,29 +118,51 @@ export default async function LessonPage({
                       {m.title}
                     </div>
                     <div className="space-y-1">
-                      {m.lessons?.sort((a: any, b: any) => a.order - b.order).map((l: any) => (
-                        <Link
-                          key={l.id}
-                          href={`/dashboard/courses/${courseId}/lessons/${l.id}`}
-                          className={`group flex items-center gap-3 px-3 py-3 rounded-2xl text-sm transition-all ${
-                            l.id === lessonId 
-                              ? "bg-primary/10 text-primary font-bold border border-primary/20 shadow-lg shadow-primary/5" 
-                              : "hover:bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-transparent"
-                          }`}
-                        >
-                          <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-all ${
-                            l.id === lessonId 
-                              ? "bg-primary border-primary text-white" 
-                              : "bg-white/[0.05] border-white/[0.08] group-hover:border-white/20"
-                          }`}>
-                            <span className="text-[10px]">{l.order}</span>
-                          </div>
-                          <span className="truncate flex-1 tracking-tight">{l.title}</span>
-                          {l.id === lessonId && (
-                            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                          )}
-                        </Link>
-                      ))}
+                      {m.lessons?.sort((a: any, b: any) => a.order - b.order).map((l: any) => {
+                        const lessonIdx = allLessons.findIndex((ll: any) => ll.id === l.id);
+                        const isLessonCompleted = allProgress?.some(p => p.lesson_id === l.id && p.is_completed);
+                        const isLessonLocked = lessonIdx > 0 && !allProgress?.some(p => p.lesson_id === allLessons[lessonIdx - 1].id && p.is_completed);
+                        
+                        if (isLessonLocked) {
+                          return (
+                            <div
+                              key={l.id}
+                              className="flex items-center gap-3 px-3 py-3 rounded-2xl text-sm text-slate-500 opacity-50 cursor-not-allowed border border-transparent"
+                            >
+                              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.05]">
+                                <Lock className="h-3 w-3" />
+                              </div>
+                              <span className="truncate flex-1 tracking-tight">{l.title}</span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <Link
+                            key={l.id}
+                            href={`/dashboard/courses/${courseId}/lessons/${l.id}`}
+                            className={`group flex items-center gap-3 px-3 py-3 rounded-2xl text-sm transition-all ${
+                              l.id === lessonId 
+                                ? "bg-primary/10 text-primary font-bold border border-primary/20 shadow-lg shadow-primary/5" 
+                                : "hover:bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-transparent"
+                            }`}
+                          >
+                            <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-all ${
+                              l.id === lessonId 
+                                ? "bg-primary border-primary text-white" 
+                                : isLessonCompleted
+                                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                                  : "bg-white/[0.05] border-white/[0.08] group-hover:border-white/20"
+                            }`}>
+                              {isLessonCompleted ? <CheckCircle2 className="h-3 w-3" /> : <span className="text-[10px]">{l.order}</span>}
+                            </div>
+                            <span className="truncate flex-1 tracking-tight">{l.title}</span>
+                            {l.id === lessonId && (
+                              <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                            )}
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

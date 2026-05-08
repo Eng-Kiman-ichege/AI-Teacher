@@ -99,3 +99,30 @@ CREATE POLICY "Users can manage their own courses" ON courses FOR ALL
 CREATE POLICY "Anyone can view modules" ON modules FOR SELECT USING (TRUE);
 CREATE POLICY "Anyone can view lessons" ON lessons FOR SELECT USING (TRUE);
 CREATE POLICY "Anyone can manage progress" ON progress FOR ALL USING (TRUE);
+
+-- CERTIFICATES TABLE
+CREATE TABLE IF NOT EXISTS certificates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT REFERENCES users(user_id) ON DELETE CASCADE,
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  issued_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  certificate_url TEXT,
+  UNIQUE(user_id, course_id)
+);
+
+-- GOALS TABLE
+CREATE TABLE IF NOT EXISTS goals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT REFERENCES users(user_id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  is_completed BOOLEAN DEFAULT FALSE,
+  target_date DATE,
+  completed_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+ALTER TABLE certificates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own certificates" ON certificates FOR SELECT USING (TRUE);
+CREATE POLICY "Users can manage their own goals" ON goals FOR ALL USING (TRUE);
