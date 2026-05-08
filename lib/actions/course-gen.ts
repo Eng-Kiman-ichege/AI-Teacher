@@ -217,3 +217,43 @@ export async function generateLessonContentAction(lessonId: string) {
     throw new Error("Failed to generate deep lesson content.");
   }
 }
+
+export async function completeLessonAction(lessonId: string) {
+  const clerkUser = await currentUser();
+  if (!clerkUser) throw new Error("Unauthorized");
+
+  const supabase = createServiceClient();
+
+  // Upsert progress
+  const { data: progress, error } = await supabase
+    .from("progress")
+    .upsert({
+      user_id: clerkUser.id,
+      lesson_id: lessonId,
+      is_completed: true,
+      completed_at: new Date().toISOString()
+    }, {
+      onConflict: "user_id,lesson_id"
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error completing lesson:", error);
+    throw new Error(error.message);
+  }
+
+  // Fetch course ID for revalidation
+  const { data: lesson } = await supabase
+    .from("lessons")
+    .select("module:modules(course_id)")
+    .eq("id", lessonId)
+    .single();
+
+  if (lesson?.module) {
+    revalidatePath(`/dashboard/courses/${(lesson.module as any).course_id}`);
+    revalidatePath(`/dashboard/courses/${(lesson.module as any).course_id}/lessons/${lessonId}`);
+  }
+
+  return { success: true };
+}

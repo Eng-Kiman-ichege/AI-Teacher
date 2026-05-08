@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { generateLessonContentAction } from "@/lib/actions/course-gen";
+import { generateLessonContentAction, completeLessonAction } from "@/lib/actions/course-gen";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2, BookOpen, Wand2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,11 +11,25 @@ import { motion } from "framer-motion";
 interface LessonContentProps {
   lessonId: string;
   initialContent: string | null;
+  initialIsCompleted?: boolean;
 }
 
-export function LessonContent({ lessonId, initialContent }: LessonContentProps) {
+export function LessonContent({ lessonId, initialContent, initialIsCompleted = false }: LessonContentProps) {
   const [content, setContent] = React.useState(initialContent);
   const [isGenerating, setIsGenerating] = React.useState(false);
+  const [isCompleted, setIsCompleted] = React.useState(initialIsCompleted);
+
+  const handleComplete = async () => {
+    try {
+      const result = await completeLessonAction(lessonId);
+      if (result.success) {
+        setIsCompleted(true);
+        toast.success("Progress saved! Great job on completing this module.");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save progress.");
+    }
+  };
 
   React.useEffect(() => {
     if (!content && !isGenerating) {
@@ -72,7 +86,14 @@ export function LessonContent({ lessonId, initialContent }: LessonContentProps) 
   }
 
   if (content) {
-    return <ContentRenderer content={content} lessonTitle="Lesson Content" />;
+    return (
+      <ContentRenderer 
+        content={content} 
+        lessonTitle="Lesson Content" 
+        onComplete={handleComplete}
+        isCompleted={isCompleted}
+      />
+    );
   }
 
   return (

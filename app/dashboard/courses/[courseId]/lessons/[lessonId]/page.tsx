@@ -140,7 +140,11 @@ export default async function LessonPage({
             </Link>
           </div>
 
-          <LessonContent lessonId={lessonId} initialContent={lesson.content} />
+          <LessonContent 
+            lessonId={lessonId} 
+            initialContent={lesson.content} 
+            initialIsCompleted={isCompleted} 
+          />
 
           {/* Navigation Footer */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 pt-10 sm:pt-16 border-t border-border">

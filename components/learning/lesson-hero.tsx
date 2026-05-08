@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { motion } from "framer-motion";
 import { Clock, BookOpen, BarChart, CheckCircle2, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,7 @@ interface LessonHeroProps {
   duration: string;
   difficulty: string;
   progress: number;
-  onComplete?: () => void;
+  onComplete?: () => Promise<void> | void;
   isCompleted?: boolean;
 }
 
@@ -25,6 +26,19 @@ export function LessonHero({
   onComplete,
   isCompleted,
 }: LessonHeroProps) {
+  const [isCompleting, setIsCompleting] = React.useState(false);
+
+  const handleComplete = async () => {
+    if (onComplete && !isCompleted && !isCompleting) {
+      setIsCompleting(true);
+      try {
+        await onComplete();
+      } finally {
+        setIsCompleting(false);
+      }
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -58,29 +72,31 @@ export function LessonHero({
           <div className="w-full sm:w-80 space-y-2 sm:space-y-3">
             <div className="flex justify-between text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
               <span>Mastery Progress</span>
-              <span>{progress}%</span>
+              <span>{isCompleted ? 100 : progress}%</span>
             </div>
-            <Progress value={progress} className="h-1 sm:h-1.5 bg-white/[0.05]" />
+            <Progress value={isCompleted ? 100 : progress} className="h-1 sm:h-1.5 bg-white/[0.05]" />
           </div>
 
           <Button 
-            onClick={onComplete}
-            disabled={isCompleted}
-            className={`w-full sm:w-auto h-14 sm:h-16 px-8 sm:px-10 rounded-2xl font-black transition-all duration-300 shadow-xl ${
+            onClick={handleComplete}
+            disabled={isCompleted || isCompleting}
+            className={`h-12 sm:h-14 px-6 sm:px-10 rounded-xl sm:rounded-2xl font-black transition-all shadow-2xl transition-all hover:scale-105 active:scale-95 w-full sm:w-auto disabled:opacity-70 ${
               isCompleted 
                 ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/20" 
-                : "bg-primary hover:bg-primary/90 shadow-primary/20 scale-105 hover:scale-110 text-white text-sm sm:text-base"
+                : "bg-primary hover:bg-primary/90 text-white shadow-primary/20"
             }`}
           >
-            {isCompleted ? (
+            {isCompleting ? (
+              "Completing..."
+            ) : isCompleted ? (
               <>
-                <CheckCircle2 className="mr-2 h-5 w-5" />
-                Completed
+                <CheckCircle2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                Lesson Completed
               </>
             ) : (
               <>
                 Mark as Complete
-                <ArrowRight className="ml-2 sm:ml-3 h-4 sm:h-5 w-4 sm:w-5" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </>
             )}
           </Button>

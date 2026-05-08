@@ -16,9 +16,16 @@ interface Block {
 interface ContentRendererProps {
   content: string;
   lessonTitle: string;
+  onComplete?: () => Promise<void> | void;
+  isCompleted?: boolean;
 }
 
-export function ContentRenderer({ content, lessonTitle }: ContentRendererProps) {
+export function ContentRenderer({ 
+  content, 
+  lessonTitle,
+  onComplete,
+  isCompleted
+}: ContentRendererProps) {
   const blocks = React.useMemo(() => {
     if (!content) return [];
     
@@ -51,7 +58,9 @@ export function ContentRenderer({ content, lessonTitle }: ContentRendererProps) 
                 summary={block.summary}
                 duration={block.duration || "15 min"}
                 difficulty={block.difficulty || "Beginner"}
-                progress={0} // This would be dynamic in a real app
+                progress={0}
+                onComplete={onComplete}
+                isCompleted={isCompleted}
               />
             );
           case "concept":
