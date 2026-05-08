@@ -14,11 +14,13 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useClerk } from "@clerk/nextjs";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const menuItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -28,7 +30,12 @@ const menuItems = [
   { name: "Discover", href: "/dashboard/discover", icon: Search },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const { signOut } = useClerk();
@@ -36,11 +43,21 @@ export function Sidebar() {
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen border-r border-border bg-background transition-all duration-300",
-        isCollapsed ? "w-[80px]" : "w-[260px]"
+        "fixed left-0 top-0 z-40 h-screen border-r border-border bg-background transition-all duration-300 lg:translate-x-0",
+        isCollapsed ? "w-[80px]" : "w-[260px]",
+        isOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
-      <div className="flex h-full flex-col p-4">
+      <div className="flex h-full flex-col p-4 relative">
+        {/* Mobile Close Button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onClose}
+          className="absolute right-2 top-2 lg:hidden"
+        >
+          <X className="h-5 w-5" />
+        </Button>
         {/* Logo */}
         <div className="mb-8 flex items-center gap-2 px-2">
           <div className="bg-primary p-1.5 rounded-lg shrink-0">
@@ -107,6 +124,11 @@ export function Sidebar() {
               </Button>
             </div>
           )}
+
+          <div className="flex items-center gap-3 px-3 py-2">
+            <ThemeToggle />
+            {!isCollapsed && <span className="text-sm font-medium text-muted-foreground">Switch Theme</span>}
+          </div>
 
           <Button
             variant="ghost"

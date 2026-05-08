@@ -50,16 +50,16 @@ export function EducationalCallout({ type, content, title }: EducationalCalloutP
       initial={{ opacity: 0, scale: 0.98 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
-      className={`rounded-3xl border ${border} ${bg} p-8 flex gap-6 items-start shadow-xl backdrop-blur-sm`}
+      className={`rounded-2xl sm:rounded-3xl border ${border} ${bg} p-5 sm:p-8 flex gap-4 sm:gap-6 items-start shadow-xl backdrop-blur-sm w-full`}
     >
-      <div className={`mt-1 h-10 w-10 shrink-0 flex items-center justify-center rounded-xl bg-black/40 border border-white/[0.05] ${color}`}>
-        <Icon className="h-5 w-5" />
+      <div className={`mt-1 h-8 w-8 sm:h-10 sm:w-10 shrink-0 flex items-center justify-center rounded-lg sm:rounded-xl bg-black/40 border border-white/[0.05] ${color}`}>
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
-      <div className="space-y-2">
-        <span className={`text-[10px] uppercase font-black tracking-[0.3em] ${color} opacity-80`}>
+      <div className="space-y-1 sm:space-y-2 min-w-0">
+        <span className={`text-[8px] sm:text-[10px] uppercase font-black tracking-[0.3em] ${color} opacity-80`}>
           {title || label}
         </span>
-        <div className="text-slate-300 leading-relaxed font-medium text-lg">
+        <div className="text-slate-300 leading-relaxed font-medium text-sm sm:text-lg break-words">
           {content}
         </div>
       </div>

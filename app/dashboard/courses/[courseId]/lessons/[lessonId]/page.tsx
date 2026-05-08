@@ -67,13 +67,13 @@ export default async function LessonPage({
   const nextLesson = allLessons[currentIndex + 1];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#020617] text-slate-200 dark">
-      {/* LEFT SIDEBAR: Navigation */}
-      <div className="hidden lg:flex w-80 flex-col border-r border-white/[0.03] bg-[#020617] shadow-2xl">
-        <div className="p-6 space-y-8">
+    <div className="flex h-screen w-full overflow-hidden bg-[#020617] text-slate-200 dark relative">
+      {/* LEFT SIDEBAR: Navigation (Hidden on mobile, side-menu on desktop) */}
+      <div className="hidden lg:flex w-80 flex-col border-r border-white/[0.03] bg-[#020617] shadow-2xl shrink-0">
+        <div className="p-6 space-y-8 flex flex-col h-full">
           <Link 
             href={`/dashboard/courses/${courseId}`}
-            className="flex items-center gap-3 text-xs font-bold text-slate-400 hover:text-white transition-all group tracking-widest uppercase"
+            className="flex items-center gap-3 text-xs font-bold text-slate-400 hover:text-white transition-all group tracking-widest uppercase shrink-0"
           >
             <div className="h-8 w-8 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center group-hover:bg-primary/20 group-hover:text-primary transition-all">
               <ArrowLeft className="h-4 w-4" />
@@ -81,18 +81,18 @@ export default async function LessonPage({
             Back to Course
           </Link>
           
-          <div className="space-y-2">
-            <h3 className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-500 px-2 mb-4">
+          <div className="space-y-2 flex-1 flex flex-col min-h-0">
+            <h3 className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-500 px-2 mb-4 shrink-0">
               Curriculum Roadmap
             </h3>
-            <ScrollArea className="h-[calc(100vh-220px)] pr-4">
-              <div className="space-y-8">
+            <ScrollArea className="flex-1 pr-4">
+              <div className="space-y-8 pb-10">
                 {course.modules?.sort((a: any, b: any) => a.order - b.order).map((m: any) => (
                   <div key={m.id} className="space-y-3">
-                    <p className="text-[11px] font-black text-slate-400 px-2 flex items-center gap-2 uppercase tracking-wider">
+                    <div className="text-[11px] font-black text-slate-400 px-2 flex items-center gap-2 uppercase tracking-wider">
                       <div className="h-1 w-1 rounded-full bg-primary/50" />
                       {m.title}
-                    </p>
+                    </div>
                     <div className="space-y-1">
                       {m.lessons?.sort((a: any, b: any) => a.order - b.order).map((l: any) => (
                         <Link
@@ -126,16 +126,27 @@ export default async function LessonPage({
         </div>
       </div>
 
-      {/* CENTER: Lesson Content */}
-      <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#020617] selection:bg-primary/30">
-        <div className="max-w-4xl mx-auto px-8 py-16 lg:px-16 space-y-16">
+      {/* CENTER: Lesson Content (Fully Responsive) */}
+      <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden custom-scrollbar bg-[#020617] selection:bg-primary/30 relative">
+        <div className="w-full max-w-4xl min-w-0 mx-auto px-3 sm:px-8 py-10 sm:py-16 lg:px-16 space-y-10 sm:space-y-16 overflow-hidden">
+          {/* Mobile Header (Back link) */}
+          <div className="lg:hidden mb-6">
+            <Link 
+              href={`/dashboard/courses/${courseId}`}
+              className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Course Curriculum
+            </Link>
+          </div>
+
           <LessonContent lessonId={lessonId} initialContent={lesson.content} />
 
           {/* Navigation Footer */}
-          <div className="flex items-center justify-between gap-6 pt-16 border-t border-white/[0.05]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 pt-10 sm:pt-16 border-t border-white/[0.05]">
             <Button 
               variant="outline" 
-              className="h-14 px-8 rounded-2xl bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] transition-all font-bold text-slate-400 hover:text-white"
+              className="w-full sm:w-auto h-14 px-8 rounded-2xl bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] transition-all font-bold text-slate-400 hover:text-white"
               disabled={!prevLesson}
               asChild={!!prevLesson}
             >
@@ -153,7 +164,7 @@ export default async function LessonPage({
             </Button>
 
             <Button 
-              className="h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 font-black shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 text-white"
+              className="w-full sm:w-auto h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 font-black shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 text-white"
               asChild={!!nextLesson}
             >
               {nextLesson ? (
@@ -171,47 +182,6 @@ export default async function LessonPage({
           </div>
         </div>
       </main>
-
-      {/* RIGHT SIDEBAR: Tools & Tutor */}
-      <div className="hidden xl:flex w-96 flex-col border-l border-white/[0.03] bg-[#020617] p-8 space-y-10">
-        <div className="space-y-4">
-          <h3 className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-500 mb-2">
-            Personal AI Tutor
-          </h3>
-          <TutorPanel />
-        </div>
-
-        <div className="space-y-4 pt-6">
-          <h3 className="text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground">
-            Learning Tools
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" className="h-20 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 flex flex-col gap-2 transition-all group">
-              <Bookmark className="h-5 w-5 text-violet-400 group-hover:scale-110 transition-transform" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Bookmark</span>
-            </Button>
-            <Button variant="outline" className="h-20 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 flex flex-col gap-2 transition-all group">
-              <StickyNote className="h-5 w-5 text-emerald-400 group-hover:scale-110 transition-transform" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Take Note</span>
-            </Button>
-          </div>
-          
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-primary/20 to-violet-500/20 border border-white/10 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-primary">
-                <Sparkles className="h-6 w-6" />
-              </div>
-              <p className="text-sm font-bold text-white">Daily Streak: 5 Days</p>
-            </div>
-            <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
-              <div className="h-full w-[70%] bg-primary" />
-            </div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-              Almost at your daily goal!
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

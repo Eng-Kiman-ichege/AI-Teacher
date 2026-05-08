@@ -40,7 +40,7 @@ export function ContentRenderer({ content, lessonTitle }: ContentRendererProps) 
   }, [content]);
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-12 pb-20 w-full overflow-hidden">
       {blocks.map((block, index) => {
         switch (block.type) {
           case "hero":
@@ -102,15 +102,15 @@ export function ContentRenderer({ content, lessonTitle }: ContentRendererProps) 
             return (
               <div 
                 key={index}
-                className="prose prose-lg prose-invert max-w-none 
-                  prose-headings:font-bold prose-headings:tracking-tight
-                  prose-h3:text-primary prose-h3:text-3xl prose-h3:mb-6
-                  prose-h4:text-violet-400 prose-h4:text-xl prose-h4:border-b prose-h4:border-violet-400/20 prose-h4:pb-2 prose-h4:mb-4
-                  prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-6
-                  prose-pre:bg-[#1e1e1e] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl prose-pre:p-6 prose-pre:shadow-2xl
-                  prose-code:text-emerald-400 prose-code:bg-emerald-400/10 prose-code:px-2 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
+                className="prose prose-sm sm:prose-base md:prose-lg prose-invert max-w-none 
+                  prose-headings:font-bold prose-headings:tracking-tight prose-headings:break-words
+                  prose-h3:text-primary prose-h3:text-2xl sm:prose-h3:text-3xl prose-h3:mb-4 sm:prose-h3:mb-6
+                  prose-h4:text-violet-400 prose-h4:text-lg sm:prose-h4:text-xl prose-h4:border-b prose-h4:border-violet-400/20 prose-h4:pb-2 prose-h4:mb-4
+                  prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-4 sm:prose-p:mb-6
+                  prose-pre:bg-[#1e1e1e] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-xl sm:prose-pre:rounded-2xl prose-pre:p-4 sm:prose-pre:p-6 prose-pre:shadow-2xl prose-pre:overflow-x-auto
+                  prose-code:text-emerald-400 prose-code:bg-emerald-400/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
                   prose-strong:text-white prose-strong:font-extrabold
-                  prose-ul:space-y-3 prose-ul:mb-6
+                  prose-ul:space-y-2 sm:prose-ul:space-y-3 prose-ul:mb-4 sm:prose-ul:mb-6
                   prose-li:text-slate-300 prose-li:marker:text-primary"
                 dangerouslySetInnerHTML={{ __html: block.html }}
               />
