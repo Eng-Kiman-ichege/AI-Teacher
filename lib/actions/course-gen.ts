@@ -147,55 +147,46 @@ export async function generateLessonContentAction(lessonId: string) {
   if (!lesson || lessonError) throw new Error("Lesson not found");
 
   const prompt = `
-    You are an expert teacher. Generate a deep, comprehensive, and engaging lesson for:
+    You are an expert world-class teacher and UX architect. Your goal is to generate a deeply structured, visually modular lesson.
+    
     Course: ${lesson.module.course.title}
     Module: ${lesson.module.title}
     Lesson Topic: ${lesson.title}
 
-    Requirements:
-    1. Provide a detailed explanation of the concept.
-    2. Include professional examples and code snippets (if applicable).
-    3. Use <h3> for main sections and <h4> for subtopics. 
-    4. For subtopics (<h4>), ensure they are descriptive.
-    5. Ensure all code is wrapped in <pre><code className="language-javascript">...</code></pre>.
-    6. Use <strong> for important terms.
-    7. Return ONLY the HTML content. No JSON, no markdown wrappers.
+    CRITICAL REQUIREMENT: Return ONLY a JSON array of educational blocks. Do NOT return markdown, HTML, or plain text.
     
-    Vibe: Professional, vibrant, and highly readable.
+    BLOCK TYPES:
+    1. { "type": "hero", "title": "...", "summary": "...", "difficulty": "...", "duration": "..." }
+    2. { "type": "concept", "title": "...", "content": "...", "icon": "lightbulb|book" }
+    3. { "type": "callout", "calloutType": "tip|warning|info|key-concept", "content": "...", "title": "..." }
+    4. { "type": "code", "language": "javascript", "code": "...", "title": "..." }
+    5. { "type": "timeline", "steps": [ { "title": "...", "description": "..." } ] }
+    6. { "type": "quiz", "question": "...", "options": [ "...", "...", "...", "..." ], "correctAnswer": 0, "explanation": "..." }
+
+    LESSON FLOW:
+    - Start with a "hero" block.
+    - Break down concepts into "concept" cards.
+    - Use "callout" blocks for tips and warnings.
+    - Provide deep code examples in "code" blocks.
+    - Explain processes using "timeline" blocks.
+    - End with a "quiz" block for knowledge verification.
     
-    Format:
-    <h3 className="text-2xl font-bold text-primary mb-4">Introduction</h3>
-    <p className="mb-6">...</p>
-    <h4 className="text-lg font-bold text-violet-400 border-b border-violet-400/30 pb-1 mb-3">Subtopic Title</h4>
-    <p className="mb-6">...</p>
-    <pre className="bg-[#1e1e1e] p-4 rounded-xl border border-white/10 mb-6 overflow-x-auto"><code className="text-sm font-mono text-gray-300">...</code></pre>
+    BE DETAILED: Each block should contain substantial educational value. Cover the topic exhaustively.
   `;
 
   try {
     const result = await chatCompletion([
-      { role: "system", content: "You are a professional educational content creator who writes exclusively in clean HTML." },
+      { role: "system", content: "You are a master educator who only communicates in structured educational block JSON." },
       { role: "user", content: prompt }
-    ]);
+    ], true);
 
     let content = result;
 
-    // Rescue logic: If AI returns JSON instead of raw HTML, extract the content field
-    if (result.trim().startsWith("{") || result.trim().startsWith("[")) {
-      try {
-        const parsed = JSON.parse(result.replace(/```json\n?|```/g, "").trim());
-        if (Array.isArray(parsed) && parsed[0]?.content) {
-          content = parsed[0].content;
-        } else if (parsed.content) {
-          content = parsed.content;
-        }
-      } catch (e) {
-        console.warn("Failed to parse AI JSON response, using raw result.");
-      }
-    }
-
-    // Final cleanup: Replace \n with <br/> or wrap in <p> if it looks like raw text
-    if (!content.includes("<p>") && !content.includes("<h3>")) {
-      content = content.split("\n\n").map(p => `<p className="mb-4">${p}</p>`).join("");
+    // Standard JSON cleaning
+    if (typeof result === "string") {
+      content = result.replace(/```json\n?|```/g, "").trim();
+    } else {
+      content = JSON.stringify(result);
     }
 
     // 2. Update lesson content
