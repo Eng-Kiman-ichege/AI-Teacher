@@ -75,7 +75,7 @@ export default async function LessonPage({
             href={`/dashboard/courses/${courseId}`}
             className="flex items-center gap-3 text-xs font-bold text-slate-400 hover:text-white transition-all group tracking-widest uppercase shrink-0"
           >
-            <div className="h-8 w-8 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center group-hover:bg-primary/20 group-hover:text-primary transition-all">
+            <div className="h-8 w-8 rounded-xl bg-muted border border-border flex items-center justify-center group-hover:bg-primary/20 group-hover:text-primary transition-all">
               <ArrowLeft className="h-4 w-4" />
             </div>
             Back to Course
@@ -143,10 +143,10 @@ export default async function LessonPage({
           <LessonContent lessonId={lessonId} initialContent={lesson.content} />
 
           {/* Navigation Footer */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 pt-10 sm:pt-16 border-t border-white/[0.05]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 pt-10 sm:pt-16 border-t border-border">
             <Button 
               variant="outline" 
-              className="w-full sm:w-auto h-14 px-8 rounded-2xl bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05] transition-all font-bold text-slate-400 hover:text-white"
+              className="w-full sm:w-auto h-14 px-8 rounded-2xl bg-muted/50 border-border hover:bg-muted transition-all font-bold text-muted-foreground hover:text-foreground"
               disabled={!prevLesson}
               asChild={!!prevLesson}
             >
