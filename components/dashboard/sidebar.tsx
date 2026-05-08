@@ -59,12 +59,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <X className="h-5 w-5" />
         </Button>
         {/* Logo */}
-        <div className="mb-8 flex items-center gap-2 px-2">
-          <div className="bg-primary p-1.5 rounded-lg shrink-0">
-            <GraduationCap className="h-5 w-5 text-primary-foreground" />
+        <div className="mb-8 flex items-center gap-3 px-2">
+          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden shrink-0">
+            <img src="/logo.png" alt="AI Teacher Logo" className="h-full w-full object-cover scale-110" />
           </div>
           {!isCollapsed && (
-            <span className="text-lg font-bold tracking-tight">AI Teacher</span>
+            <div className="flex flex-col">
+              <span className="text-lg font-bold tracking-tight leading-none text-foreground">AI Teacher</span>
+              <span className="text-[10px] font-medium text-muted-foreground tracking-wider uppercase mt-1">Intelligent Ed</span>
+            </div>
           )}
         </div>
 

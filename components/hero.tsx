@@ -4,8 +4,20 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
 export function Hero() {
+  const router = useRouter();
+  const { isSignedIn } = useUser();
+
+  const handleGenerate = () => {
+    if (isSignedIn) {
+      router.push("/dashboard");
+    } else {
+      router.push("/sign-in");
+    }
+  };
   return (
     <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
       {/* Background Gradients */}
@@ -60,7 +72,11 @@ export function Hero() {
                 placeholder="What do you want to learn? (e.g. Quantum Physics, React Hooks...)"
                 className="flex-1 border-none bg-transparent focus-visible:ring-0 text-base py-6 h-auto"
               />
-              <Button size="lg" className="rounded-xl px-8 h-auto py-4 font-semibold">
+              <Button 
+                onClick={handleGenerate}
+                size="lg" 
+                className="rounded-xl px-8 h-auto py-4 font-semibold"
+              >
                 Generate Course
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
