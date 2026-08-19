@@ -24,17 +24,17 @@ export async function chatCompletion(messages: any[], isJson = false) {
   if (!response.ok) {
     const error = await response.json();
     console.error("OpenRouter Error Details:", JSON.stringify(error, null, 2));
-    
+
     if (response.status === 402) {
       throw new Error("INSUFFICIENT_CREDITS: Your OpenRouter account has run out of credits. Please top up at https://openrouter.ai/settings/credits");
     }
-    
+
     throw new Error(error.error?.message || "Failed to fetch from OpenRouter");
   }
 
   const data = await response.json();
   const content = data.choices?.[0]?.message?.content || "";
-  
+
   if (!content) {
     console.error("OpenRouter returned an empty content field. Full response:", JSON.stringify(data, null, 2));
   }

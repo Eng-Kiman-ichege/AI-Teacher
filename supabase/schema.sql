@@ -1,6 +1,8 @@
--- Database Schema for AI Teacher Platform
+-- Complete Database Schema for AI Teacher Platform
 
--- Clean up existing tables for development (CAUTION: Deletes all data)
+-- Drop existing tables if re-initializing
+DROP TABLE IF EXISTS goals CASCADE;
+DROP TABLE IF EXISTS certificates CASCADE;
 DROP TABLE IF EXISTS progress CASCADE;
 DROP TABLE IF EXISTS exams CASCADE;
 DROP TABLE IF EXISTS lessons CASCADE;
@@ -8,7 +10,7 @@ DROP TABLE IF EXISTS modules CASCADE;
 DROP TABLE IF EXISTS courses CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
--- USERS TABLE (Linked to Clerk via user_id)
+-- 1. USERS TABLE (Linked to Clerk via user_id)
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT UNIQUE NOT NULL, -- Clerk User ID
@@ -19,18 +21,18 @@ CREATE TABLE users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- COURSES TABLE
+-- 2. COURSES TABLE
 CREATE TABLE courses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
   category TEXT,
   image_url TEXT,
-  created_by TEXT REFERENCES users(user_id),
+  created_by TEXT REFERENCES users(user_id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- MODULES TABLE
+-- 3. MODULES TABLE
 CREATE TABLE modules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
@@ -39,19 +41,19 @@ CREATE TABLE modules (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- LESSONS TABLE
+-- 4. LESSONS TABLE
 CREATE TABLE lessons (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   module_id UUID REFERENCES modules(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  content TEXT, -- Markdown or JSON for lesson content
+  content TEXT, -- JSON structure for AI dynamic block content
   video_url TEXT,
-  duration_minutes INTEGER,
+  duration_minutes INTEGER DEFAULT 15,
   "order" INTEGER NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- PROGRESS TABLE
+-- 5. PROGRESS TABLE
 CREATE TABLE progress (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT REFERENCES users(user_id) ON DELETE CASCADE,
@@ -62,46 +64,18 @@ CREATE TABLE progress (
   UNIQUE(user_id, lesson_id)
 );
 
--- EXAMS TABLE
+-- 6. EXAMS TABLE
 CREATE TABLE exams (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  questions JSONB NOT NULL, -- JSON array of questions
+  questions JSONB NOT NULL,
   passing_score INTEGER DEFAULT 70,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- ROW LEVEL SECURITY (RLS)
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE modules ENABLE ROW LEVEL SECURITY;
-ALTER TABLE lessons ENABLE ROW LEVEL SECURITY;
-ALTER TABLE progress ENABLE ROW LEVEL SECURITY;
-ALTER TABLE exams ENABLE ROW LEVEL SECURITY;
-
--- Clean up existing policies to avoid errors
-DROP POLICY IF EXISTS "Users can view their own data" ON users;
-DROP POLICY IF EXISTS "Public select users" ON users;
-DROP POLICY IF EXISTS "Public insert users" ON users;
-DROP POLICY IF EXISTS "Anyone can view courses" ON courses;
-DROP POLICY IF EXISTS "Anyone can view modules" ON modules;
-DROP POLICY IF EXISTS "Anyone can view lessons" ON lessons;
-DROP POLICY IF EXISTS "Users can view their own progress" ON progress;
-DROP POLICY IF EXISTS "Anyone can manage progress" ON progress;
-
--- Policies (Open for development - protected by Next.js Middleware)
-CREATE POLICY "Public select users" ON users FOR SELECT USING (TRUE);
-CREATE POLICY "Public insert users" ON users FOR INSERT WITH CHECK (TRUE);
-CREATE POLICY "Anyone can view courses" ON courses FOR SELECT USING (TRUE);
-CREATE POLICY "Users can manage their own courses" ON courses FOR ALL 
-  USING (auth.uid()::text = created_by);
-CREATE POLICY "Anyone can view modules" ON modules FOR SELECT USING (TRUE);
-CREATE POLICY "Anyone can view lessons" ON lessons FOR SELECT USING (TRUE);
-CREATE POLICY "Anyone can manage progress" ON progress FOR ALL USING (TRUE);
-
--- CERTIFICATES TABLE
-CREATE TABLE IF NOT EXISTS certificates (
+-- 7. CERTIFICATES TABLE
+CREATE TABLE certificates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT REFERENCES users(user_id) ON DELETE CASCADE,
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
@@ -110,8 +84,8 @@ CREATE TABLE IF NOT EXISTS certificates (
   UNIQUE(user_id, course_id)
 );
 
--- GOALS TABLE
-CREATE TABLE IF NOT EXISTS goals (
+-- 8. GOALS TABLE
+CREATE TABLE goals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT REFERENCES users(user_id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -121,8 +95,32 @@ CREATE TABLE IF NOT EXISTS goals (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+-- ENABLE ROW LEVEL SECURITY
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE modules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lessons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exams ENABLE ROW LEVEL SECURITY;
 ALTER TABLE certificates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view their own certificates" ON certificates FOR SELECT USING (TRUE);
-CREATE POLICY "Users can manage their own goals" ON goals FOR ALL USING (TRUE);
+-- POLICIES (Access permissions)
+CREATE POLICY "Public select users" ON users FOR SELECT USING (TRUE);
+CREATE POLICY "Public insert users" ON users FOR INSERT WITH CHECK (TRUE);
+CREATE POLICY "Public update users" ON users FOR UPDATE USING (TRUE);
+
+CREATE POLICY "Anyone can view courses" ON courses FOR SELECT USING (TRUE);
+CREATE POLICY "Anyone can manage courses" ON courses FOR ALL USING (TRUE);
+
+CREATE POLICY "Anyone can view modules" ON modules FOR SELECT USING (TRUE);
+CREATE POLICY "Anyone can manage modules" ON modules FOR ALL USING (TRUE);
+
+CREATE POLICY "Anyone can view lessons" ON lessons FOR SELECT USING (TRUE);
+CREATE POLICY "Anyone can manage lessons" ON lessons FOR ALL USING (TRUE);
+
+CREATE POLICY "Anyone can manage progress" ON progress FOR ALL USING (TRUE);
+CREATE POLICY "Anyone can manage exams" ON exams FOR ALL USING (TRUE);
+CREATE POLICY "Anyone can view certificates" ON certificates FOR SELECT USING (TRUE);
+CREATE POLICY "Anyone can manage certificates" ON certificates FOR ALL USING (TRUE);
+CREATE POLICY "Anyone can manage goals" ON goals FOR ALL USING (TRUE);
